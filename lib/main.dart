@@ -42,17 +42,17 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Transaction> get _recentTransactions {
     return _userTransaction.where((tx) {
       return tx.date.isAfter(
-        DateTime.now().subtract(Duration(days: 7)),
+        DateTime.now().subtract(const Duration(days: 7)),
       );
     }).toList();
   }
 
-  void _addNewTransaction(String title, double amount) {
+  void _addNewTransaction(String title, double amount, DateTime choosenDate) {
     final newTx = Transaction(
       id: DateTime.now().toString(),
       title: title,
       amount: amount,
-      date: DateTime.now(),
+      date: choosenDate,
     );
 
     setState(() {
@@ -75,32 +75,42 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> _userTransaction = [];
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Expense Tracker'),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {
-                _startAddNewTransaction(context);
-              },
-            )
+  Widget build(BuildContext context) {
+    final appBar = AppBar(
+      title: const Text('Expense Tracker'),
+      actions: <Widget>[
+        IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => _startAddNewTransaction(context))
+      ],
+    );
+    return Scaffold(
+      appBar: appBar,
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            SizedBox(
+                height: (MediaQuery.of(context).size.height -
+                        appBar.preferredSize.height -
+                        MediaQuery.of(context).padding.top) *
+                    0.3,
+                child: Chart(recentTransactions: _recentTransactions)),
+            SizedBox(
+                height: (MediaQuery.of(context).size.height -
+                        appBar.preferredSize.height -
+                        MediaQuery.of(context).padding.top) *
+                    0.7,
+                child: TransactionList(_userTransaction)),
           ],
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Chart(recentTransactions: _recentTransactions),
-              TransactionList(_userTransaction),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            _startAddNewTransaction(context);
-          },
-          child: const Icon(Icons.add),
-        ),
-      );
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _startAddNewTransaction(context);
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
 }
